@@ -1,0 +1,9 @@
+<!doctype html><html lang="pt"><head><meta charset="UTF-8"><meta name="robots" content="noindex"><title>Bilar DigitalTech</title></head><body><script>
+(function(){
+  var p=location.pathname;
+  var isGithub=location.hostname.endsWith('.github.io');
+  var base=isGithub ? (p.split('/').filter(Boolean).length ? '/'+p.split('/').filter(Boolean)[0]+'/' : '/') : '/';
+  var isAdmin=/\/admin(?:\/|$)/.test(p)||/\/gestao-bilar(?:\/|$)/.test(p);
+  location.replace(location.origin+base+(isAdmin?'#/admin':'#'));
+})();
+</script></body></html>

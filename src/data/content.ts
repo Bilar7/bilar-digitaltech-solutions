@@ -1,0 +1,45 @@
+import { Service, Project, Testimonial, TeamMember, BlogPost } from '../types';
+
+export const COMPANY_INFO = {
+  name: 'Bilar DigitalTech Solutions', shortName: 'Bilar', tagline: 'Ideias que conectam. Soluções que transformam.',
+  badge: 'INOVAÇÃO QUE TRANSFORMA', heroTitle: 'Transformamos ideias em soluções digitais.',
+  heroImage: '/bilar_hero_bilar_office.webp',
+  heroSubtitle: 'Não criamos apenas tecnologia. Criamos produtos, serviços e soluções que transformam ideias em oportunidades reais.',
+  founder: 'George Fernando Bilar', founderRole: 'Fundador & Diretor Executivo (CEO)',
+  manager: 'Bilar Fernando Bilar', managerRole: 'Co-Fundador & Gestor Geral',
+  phone: '+258 865722051', whatsappUrl: 'https://wa.me/258865722051', email: 'bilardigitaltechsolutions@gmail.com',
+  secondaryEmail: 'infobilardigitaltechsolutions@gmail.com', location: 'Maputo, Moçambique',
+  stats: [
+    { value: '0', label: 'Projectos publicados', icon: 'FolderGit2' },
+    { value: '0', label: 'Produtos Bilar', icon: 'Package' },
+    { value: '0', label: 'Pessoas na equipa', icon: 'Users' },
+    { value: '0', label: 'Serviços activos', icon: 'BriefcaseBusiness' },
+  ],
+};
+
+export const SERVICES: Service[] = [
+  { id:'web', image:'/services/web-development.svg', title:'Desenvolvimento Web', description:'Websites e plataformas profissionais, rápidos e responsivos, preparados para apresentar o seu negócio e facilitar resultados digitais.', fullDescription:'Criamos websites institucionais, plataformas e aplicações web à medida, com foco em experiência, desempenho, segurança, SEO e manutenção.', iconName:'Globe', features:['Design responsivo','Performance','SEO técnico','Painel de gestão'], deliverables:['Websites institucionais','Landing pages','Plataformas web','Sistemas web à medida'] },
+  { id:'mobile', image:'/services/android-app.svg', title:'Aplicações Android', description:'Aplicações Android intuitivas e eficientes para aproximar o seu negócio dos clientes através do smartphone.', fullDescription:'Desenvolvemos aplicações Android com experiências simples, integração com APIs, notificações, autenticação e dados em tempo real.', iconName:'Smartphone', features:['Android nativo ou híbrido','Integração com APIs','Notificações','Experiência fluida'], deliverables:['Aplicações empresariais','Apps de serviços','Apps de entrega','Produtos digitais'] },
+  { id:'sistemas', image:'/services/business-systems.svg', title:'Business Systems', description:'Sistemas empresariais para organizar dados, automatizar processos, acompanhar indicadores e melhorar a produtividade.', fullDescription:'Criamos sistemas para gestão de processos, clientes, operações, relatórios, informação empresarial e controlo por perfis.', iconName:'LayoutDashboard', features:['Gestão de dados','Automação','Dashboards','Acessos por perfil'], deliverables:['Sistemas internos','CRM','Portais','Dashboards empresariais'] },
+  { id:'cloud', image:'/services/cloud-infrastructure.svg', title:'Cloud', description:'Infraestrutura em nuvem para alojar aplicações, dados e serviços com escalabilidade, disponibilidade e segurança.', fullDescription:'Planeamos e estruturamos ambientes cloud adequados ao projecto, com foco em disponibilidade, desempenho, segurança e crescimento.', iconName:'Cloud', features:['Servidores cloud','Escalabilidade','Backups','Monitorização'], deliverables:['Infraestrutura cloud','Deploy de aplicações','Backups','Monitorização'] },
+  { id:'seguranca', image:'/services/cybersecurity.svg', title:'Segurança', description:'Proteção de sistemas, dados e redes contra riscos digitais, com medidas práticas para reduzir vulnerabilidades.', fullDescription:'Apoiamos a proteção de aplicações, contas, dados e infraestrutura com boas práticas de segurança, controlo de acessos e monitorização.', iconName:'ShieldCheck', features:['Controlo de acessos','Proteção de dados','Auditoria','Boas práticas'], deliverables:['Avaliação de segurança','Políticas de acesso','Proteção de aplicações','Orientação técnica'] },
+  { id:'redes', image:'/services/network-infrastructure.svg', title:'Redes', description:'Infraestrutura de redes estável e segura para ligar pessoas, equipamentos, sistemas e operações com bom desempenho.', fullDescription:'Planeamos e organizamos redes empresariais, conectividade, equipamentos e segmentação para suportar operações digitais.', iconName:'Network', features:['Infraestrutura','Wi-Fi empresarial','Segmentação','Monitorização'], deliverables:['Redes empresariais','Wi-Fi','Configuração de equipamentos','Infraestrutura'] },
+  { id:'ia', image:'/services/artificial-intelligence.svg', title:'Inteligência Artificial', description:'Soluções de IA para automatizar tarefas, analisar informação e criar experiências digitais mais inteligentes.', fullDescription:'Criamos e integramos soluções de inteligência artificial para automatização, análise de dados, assistentes e produtos digitais.', iconName:'BrainCircuit', features:['Automação inteligente','Assistentes IA','Análise de dados','Integrações'], deliverables:['Assistentes virtuais','Automação de processos','Análise inteligente','Integração de IA'] },
+  { id:'embebidos', image:'/services/embedded-systems.svg', title:'Sistemas Embebidos', description:'Sistemas electrónicos e computacionais integrados em equipamentos para controlar, monitorizar e automatizar processos.', fullDescription:'Desenvolvemos e integramos sistemas embebidos para equipamentos, sensores, controladores e protótipos, com foco em fiabilidade, conectividade e automação.', iconName:'Cpu', features:['Microcontroladores','Sensores e actuadores','Firmware','Prototipagem'], deliverables:['Protótipos electrónicos','Firmware','Controladores','Integração hardware/software'] },
+  { id:'iot', image:'/services/internet-of-things.svg', title:'Internet das Coisas (IoT)', description:'Ligamos sensores, equipamentos e plataformas para transformar dados do mundo físico em informação útil e accionável.', fullDescription:'Criamos soluções IoT para recolha de dados, conectividade, monitorização, alertas e automação, desde o dispositivo até ao painel de gestão.', iconName:'RadioTower', features:['Sensores conectados','Telemetria','Dashboards','Alertas e automação'], deliverables:['Soluções IoT','Monitorização remota','Gateways','Integração com plataformas'] },
+  { id:'design', image:'/services/design-branding.svg', title:'Design & Branding', description:'Identidade visual e experiências digitais claras para tornar a sua marca mais reconhecível, profissional e consistente.', fullDescription:'Desenvolvemos identidade visual, interfaces e materiais digitais que alinham marca, comunicação e experiência do utilizador.', iconName:'Palette', features:['Identidade visual','UI/UX','Materiais digitais','Consistência de marca'], deliverables:['Logotipos','Identidade de marca','Interfaces','Materiais de comunicação'] },
+  { id:'consultoria', image:'/services/tech-consulting.svg', title:'Consultoria Tech', description:'Orientação tecnológica para escolher soluções, organizar projectos e tomar decisões digitais com mais clareza.', fullDescription:'Apoiamos empresas na análise de necessidades, arquitectura, planeamento tecnológico, transformação digital e melhoria de processos.', iconName:'BriefcaseBusiness', features:['Diagnóstico','Planeamento','Arquitectura','Estratégia digital'], deliverables:['Auditoria tecnológica','Roadmaps','Arquitectura de soluções','Aconselhamento'] },
+];
+
+export const PROJECTS: Project[] = [
+  { id:'agrosentinela-aviario', title:'AgroSentinela Aviário', category:'Sistemas', subtitle:'Monitorização inteligente para aviários', description:'Projecto de investigação e prototipagem da Bilar para monitorizar condições do aviário, sensores, ambiente, alertas e automação.', imageType:'ai', metrics:'Em desenvolvimento', promotion:'Tecnologia inteligente para apoiar decisões na produção.', technologies:['ESP32','IoT','Sensores','Automação','IA'], client:'Bilar DigitalTech Solutions', image:'/products/agro-sentinela.svg', status:'published', featured:true },
+];
+
+export const TESTIMONIALS: Testimonial[] = [];
+
+export const TEAM_MEMBERS: TeamMember[] = [
+  { id:'george-bilar', name:'George Fernando Bilar', role:'Fundador & Chief Executive Officer (CEO)', badge:'CEO & FUNDADOR', avatar:'/bilar_ceo_profile_final.webp', bio:'Fundador da Bilar DigitalTech Solutions, responsável pela visão, estratégia e desenvolvimento da empresa.', specialty:'Liderança Estratégica & Tecnologia', email:'bilardigitaltechsolutions@gmail.com', phone:'+258 865722051', isLeadership:true, active:true },
+  { id:'bilar-fernando-bilar', name:'Bilar Fernando Bilar', role:'Co-Fundador & Gestor Geral', badge:'GESTÃO & OPERAÇÕES', avatar:'/bilar_manager_profile_final.webp', bio:'Co-fundador e responsável pela gestão geral, operações e crescimento do negócio.', specialty:'Gestão Empresarial & Operações', email:'infobilardigitaltechsolutions@gmail.com', isLeadership:true, active:true },
+];
+
+export const BLOG_POSTS: BlogPost[] = [];

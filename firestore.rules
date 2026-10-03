@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function verified() { return signedIn() && request.auth.token.email_verified == true; }
+    function isAdmin() {
+      return verified()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active == true;
+    }
+
+
+    function isSuperAdmin() {
+      return isAdmin()
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'Super Admin';
+    }
+    function canEditContent() {
+      return isAdmin()
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role in ['Super Admin','Admin','Editor'];
+    }
+
+    match /site/main {
+      allow read: if true;
+      allow write: if canEditContent();
+    }
+
+    match /admins/{uid} {
+      // O Super Admin cria os perfis dos colaboradores.
+      allow create: if (isSuperAdmin()
+          && !exists(/databases/$(database)/documents/admins/$(uid))
+          && request.resource.data.role in ['Admin','Editor','Team Manager']
+          && request.resource.data.active == true)
+        || (verified()
+          && request.auth.uid == uid
+          && request.auth.token.email == 'bilarjojofernando@gmail.com'
+          && request.resource.data.role == 'Super Admin'
+          && request.resource.data.active == true);
+
+      allow read: if isAdmin() || (verified() && request.auth.uid == uid);
+
+      allow update: if isSuperAdmin()
+        || (verified()
+          && request.auth.uid == uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['mustChangePassword','updatedAt']));
+
+      allow delete: if isSuperAdmin();
+    }
+
+    match /labProjects/{id} {
+      allow read, write: if isAdmin();
+    }
+
+    // Links to independent product administration are private corporate metadata.
+    // They are never part of the public /site/main document.
+    match /productOperations/{productId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /contactMessages/{id} {
+      allow create: if request.resource.data.name is string
+        && request.resource.data.email is string
+        && request.resource.data.message is string
+        && request.resource.data.status == 'new';
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

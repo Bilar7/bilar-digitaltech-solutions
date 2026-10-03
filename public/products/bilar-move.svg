@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#06243a"/><stop offset="1" stop-color="#0757b8"/></linearGradient></defs>
+<rect width="900" height="560" rx="36" fill="url(#g)"/>
+<path d="M70 430 C180 360 210 210 330 270 S510 480 630 350 S760 210 835 265" fill="none" stroke="#10b981" stroke-width="14" opacity=".85"/>
+<circle cx="170" cy="365" r="34" fill="#fff" opacity=".12"/><circle cx="170" cy="365" r="12" fill="#fff"/>
+<circle cx="425" cy="375" r="34" fill="#fff" opacity=".12"/><circle cx="425" cy="375" r="12" fill="#8ee7ff"/>
+<circle cx="680" cy="310" r="34" fill="#fff" opacity=".12"/><circle cx="680" cy="310" r="12" fill="#10b981"/>
+<rect x="80" y="72" width="250" height="58" rx="29" fill="#fff" opacity=".1"/>
+<text x="105" y="110" fill="#fff" font-family="Arial,sans-serif" font-size="38" font-weight="800">BILAR MOVE</text>
+<text x="82" y="176" fill="#d8f7ef" font-family="Arial,sans-serif" font-size="22">Mobilidade • serviços • gestão digital</text>
+</svg>
