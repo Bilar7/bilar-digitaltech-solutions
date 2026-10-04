@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Phone, Linkedin, Github, Award, Sparkles, X, ArrowRight, UserCheck } from 'lucide-react';
+import { Mail, Phone, Linkedin, Github, Instagram, Facebook, Globe, Youtube, Twitter, Award, Sparkles, X, ArrowRight, UserCheck } from 'lucide-react';
 import { useSiteData } from '../context/SiteContext';
 import { useLanguage } from '../context/LanguageContext';
 import { TeamMember } from '../types';
@@ -8,10 +8,34 @@ interface TeamSectionProps {
   onContactClick: (prefillNote?: string) => void;
 }
 
+const MemberSocialLinks = ({ member }: { member: TeamMember }) => {
+  const links = [
+    { label: 'LinkedIn', href: member.linkedin, Icon: Linkedin },
+    { label: 'GitHub', href: member.github, Icon: Github },
+    { label: 'Instagram', href: member.instagram, Icon: Instagram },
+    { label: 'Facebook', href: member.facebook, Icon: Facebook },
+    { label: 'X', href: member.x, Icon: Twitter },
+    { label: 'YouTube', href: member.youtube, Icon: Youtube },
+    { label: 'Website', href: member.website, Icon: Globe },
+  ].filter((link) => Boolean(link.href));
+
+  if (!links.length) return null;
+  return <div className="flex items-center gap-1.5">
+    {links.map(({ label, href, Icon }) => <a key={label} href={href!} target="_blank" rel="noopener noreferrer" aria-label={`${label} de ${member.name}`} title={label} className="grid h-8 w-8 place-items-center rounded-lg bg-slate-100 text-slate-600 transition-colors hover:bg-emerald-50 hover:text-emerald-700"><Icon className="h-4 w-4" /></a>)}
+  </div>;
+};
+
 export const TeamSection: React.FC<TeamSectionProps> = ({ onContactClick }) => {
   const { teamMembers } = useSiteData();
   const { tr } = useLanguage();
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const hierarchyLabel = (member: TeamMember) => ({
+    leadership: 'Liderança',
+    management: 'Gestão',
+    coordination: 'Coordenação',
+    specialist: 'Especialista',
+    team: 'Equipa técnica',
+  }[member.hierarchy || (member.isLeadership ? 'leadership' : 'team')]);
 
   return (
     <section id="equipa" className="py-16 sm:py-20 bg-slate-50 text-slate-900 border-b border-slate-200 relative">
@@ -44,7 +68,7 @@ export const TeamSection: React.FC<TeamSectionProps> = ({ onContactClick }) => {
 
         {/* Leadership Highlight Cards (George Fernando Bilar & Bilar Fernando Bilar) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-          {teamMembers.filter((m) => m.isLeadership).map((leader) => (
+          {teamMembers.filter((m) => m.active !== false && (m.hierarchy === 'leadership' || m.isLeadership)).map((leader) => (
             <div
               key={leader.id}
               className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-emerald-500/30 shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden flex flex-col sm:flex-row gap-6 items-center sm:items-start group"
@@ -112,6 +136,7 @@ export const TeamSection: React.FC<TeamSectionProps> = ({ onContactClick }) => {
                       <Phone className="w-4 h-4" />
                     </a>
                   )}
+                  <MemberSocialLinks member={leader} />
                 </div>
               </div>
             </div>
@@ -121,12 +146,12 @@ export const TeamSection: React.FC<TeamSectionProps> = ({ onContactClick }) => {
         {/* Other Team Members Grid */}
         <div>
           <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-6 flex items-center gap-2">
-            <span>CORPO TÉCNICO & ESPECIALISTAS</span>
+            <span>EQUIPA & ESTRUTURA</span>
             <span className="h-px bg-slate-200 flex-1" />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {teamMembers.filter((m) => !m.isLeadership).map((member) => (
+            {teamMembers.filter((m) => m.active !== false && m.hierarchy !== 'leadership' && !m.isLeadership).map((member) => (
               <div
                 key={member.id}
                 className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between group hover:-translate-y-1"
@@ -144,7 +169,7 @@ export const TeamSection: React.FC<TeamSectionProps> = ({ onContactClick }) => {
 
                   <div className="text-center space-y-1">
                     <span className="text-[10px] font-bold text-[#059669] bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
-                      {member.badge}
+                      {member.badge || hierarchyLabel(member)}
                     </span>
                     <h4 className="text-base font-bold text-slate-900 pt-1">
                       {member.name}
@@ -162,7 +187,7 @@ export const TeamSection: React.FC<TeamSectionProps> = ({ onContactClick }) => {
                 {/* Footer Action */}
                 <div className="pt-4 mt-3 border-t border-slate-100 flex items-center justify-between">
                   <span className="text-[11px] font-semibold text-[#0284c7]">
-                    {member.specialty.split(',')[0]}
+                    {member.specialty?.split(',')[0] || member.department || ''}
                   </span>
                   <button
                     onClick={() => setSelectedMember(member)}
@@ -172,6 +197,7 @@ export const TeamSection: React.FC<TeamSectionProps> = ({ onContactClick }) => {
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
+                <div className="mt-3 flex justify-center"><MemberSocialLinks member={member} /></div>
               </div>
             ))}
           </div>
@@ -223,7 +249,7 @@ export const TeamSection: React.FC<TeamSectionProps> = ({ onContactClick }) => {
               <div className="text-xs text-slate-600">{selectedMember.specialty}</div>
             </div>
 
-            <div className="pt-2 flex items-center justify-between gap-3 border-t border-slate-100">
+            <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100">
               <div className="flex items-center gap-2">
                 {selectedMember.email && (
                   <a
@@ -243,6 +269,7 @@ export const TeamSection: React.FC<TeamSectionProps> = ({ onContactClick }) => {
                     <Phone className="w-4 h-4" />
                   </a>
                 )}
+                <MemberSocialLinks member={selectedMember} />
               </div>
 
               <button

@@ -58,7 +58,7 @@ export const ProjectsAndAboutSection: React.FC<ProjectsAndAboutSectionProps> = (
     return () => { document.body.style.overflow = previousOverflow; };
   }, [selectedProject, selectedProduct]);
 
-  const statusLabel = (status: BilarProduct['status']) => status === 'available' ? 'Disponível' : status === 'research' ? 'Pesquisa' : status === 'prototype' ? 'Protótipo' : status === 'testing' ? 'Testes' : 'Em breve';
+  const statusLabel = (status: BilarProduct['status']) => status === 'available' ? 'Em funcionamento' : status === 'research' ? 'Pesquisa' : status === 'prototype' ? 'Protótipo' : status === 'testing' ? 'Testes' : 'Em breve';
 
   return <div className="space-y-0 bg-white">
     <section id="sobre" className="about-modern-section">
@@ -98,7 +98,7 @@ export const ProjectsAndAboutSection: React.FC<ProjectsAndAboutSectionProps> = (
               <h3>{product.name}</h3>
               <p>{product.description}</p>
               <div className="product-purpose"><span>Benefício</span><strong>{product.benefits?.[0] || product.promotion || 'Solução tecnológica Bilar'}</strong></div>
-              <div className="product-modern-bottom"><span>{product.price || 'Sob consulta'}</span><button onClick={() => setSelectedProduct(product)}>Ver produto <ArrowUpRight className="w-4 h-4" /></button></div>
+              <div className="product-modern-bottom"><span>{product.price || 'Sob consulta'}</span><div className="product-modern-actions">{product.status === 'available' && product.appUrl && <a className="product-app-link" href={product.appUrl} target="_blank" rel="noopener noreferrer"><ExternalLink className="w-4 h-4" />Ver aplicação</a>}<button className="product-details-link" onClick={() => setSelectedProduct(product)}>Saber mais <ArrowUpRight className="w-4 h-4" /></button></div></div>
             </div>
           </article>)}
         </div>
