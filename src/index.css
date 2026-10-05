@@ -64,7 +64,7 @@ select:focus-visible {
 .site-header-content>div{min-width:0}
 .site-header .group{padding-left:0}
 .site-header nav{flex:1;justify-content:center}
-.site-header .hidden.md\\:flex{margin-left:auto}
+.site-header .hidden.md\:flex{margin-left:auto}
 .site-footer{background:#f8fbfd!important;color:#213543!important;border-top:1px solid #dce9ee;padding-top:64px}
 .site-footer .footer-glow{background:rgba(11,159,130,.08);filter:blur(70px)}
 .footer-accent{position:absolute;top:0;height:4px;border-radius:0 0 12px 12px;z-index:1}
@@ -119,7 +119,7 @@ body{overflow-x:hidden}
 .site-header-content>div{width:100%}
 .site-header .group{padding-left:0!important}
 .site-header nav{margin-left:auto;flex:0 1 auto;justify-content:flex-end!important}
-.site-header .hidden.md\\:flex{margin-left:clamp(14px,2vw,30px)!important}
+.site-header .hidden.md\:flex{margin-left:clamp(14px,2vw,30px)!important}
 .site-footer{background:linear-gradient(180deg,#f7fbfd 0%,#ffffff 58%,#eef8f5 100%)!important;color:#263c4b!important;border-top:1px solid #d7e6ec!important;padding-top:68px}
 .site-footer:after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:linear-gradient(90deg,var(--bilar-blue) 0 38%,var(--bilar-green) 38% 62%,#101820 62% 64%,#fff 64% 100%)}
 .site-footer h4{color:var(--bilar-blue-deep)!important}
@@ -282,12 +282,9 @@ body{overflow-x:hidden}
 .site-header .bilar-logo{width:min(220px,25vw)!important}
 .site-header nav{margin-left:auto!important;justify-content:flex-end!important}
 .site-header nav a{color:#f2fbff!important}
-.site-header nav a:hover,.site-header nav a.text-\[\#057a70\]{color:#61e6b1!important}
+.site-header nav a:hover{color:#61e6b1!important}
 .site-header nav a span{background:linear-gradient(90deg,#18a8e0,#10b981)!important}
 .site-header .group{background:rgba(255,255,255,.07)!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:999px!important;padding:4px 10px!important}
-.site-header .hidden.md\\:flex .border-l{border-color:rgba(255,255,255,.16)!important}
-.site-header .hidden.md\\:flex .text-slate-600{color:#e4f2f8!important}
-.site-header .hidden.md\\:flex .hover\\:bg-slate-50:hover{background:rgba(255,255,255,.08)!important}
 
 /* HERO — uma única fotografia, sem divisão e sem lavagem azul. */
 #inicio.bilar-reference-hero{min-height:560px!important;background:#081a27!important}
@@ -357,9 +354,6 @@ body{overflow-x:hidden}
 .site-header .group{padding:2px 6px!important}
 .site-header nav{gap:18px!important}
 .site-header nav a{font-size:12px!important;letter-spacing:0!important}
-.site-header .hidden.md\\:flex{gap:9px!important}
-.site-header .hidden.md\\:flex button{padding:6px!important}
-.site-header .hidden.md\\:flex .border-l{padding-left:7px!important}
 
 /* Footer: compacto, sem espaçamento exagerado e sem colidir com outras secções. */
 .site-footer{margin-top:0!important}
@@ -556,7 +550,6 @@ body{overflow-x:hidden}
     linear-gradient(180deg,rgba(2,10,18,.18) 0%,transparent 46%,rgba(1,11,18,.14) 100%) !important;
 }
 #inicio.bilar-reference-hero .bilar-hero-copy{filter:drop-shadow(0 10px 28px rgba(0,0,0,.10));}
-#inicio.bilar-reference-hero .bilar-hero-copy .bg-\[\#10b981\],
 #inicio.bilar-reference-hero .bilar-hero-copy button:first-child{background:#0757b8!important;box-shadow:0 10px 28px rgba(7,87,184,.28)!important;border:1px solid rgba(255,255,255,.12)!important}
 #inicio.bilar-reference-hero .bilar-hero-copy button:first-child:hover{background:#064b9f!important}
 #inicio.bilar-reference-hero .bilar-hero-copy button:nth-child(2){background:#0b9f82!important;border-color:rgba(255,255,255,.35)!important;box-shadow:0 10px 28px rgba(11,159,130,.24)!important}
@@ -1206,10 +1199,6 @@ html, body, #root { width: 100%; max-width: 100%; overflow-x: hidden; }
 .site-header nav a{color:#f3fbff!important;font-size:11px!important;font-weight:700!important;background:transparent!important;}
 .site-header nav a:hover{color:#66e4b2!important;background:rgba(255,255,255,.07)!important;}
 .site-header nav a span{background:linear-gradient(90deg,#20b7f4,#18d79a)!important;}
-.site-header .hidden.md\\:flex .text-slate-600{color:#edf8fb!important;}
-.site-header .hidden.md\\:flex button{color:#e7f5f8!important;}
-.site-header .hidden.md\\:flex button:hover{color:#74e6b9!important;background:rgba(255,255,255,.07)!important;}
-.site-header .hidden.md\\:flex .border-l{border-color:rgba(255,255,255,.16)!important;}
 .header-color-ribbon{left:18%!important;right:18%!important;height:3px!important;background:linear-gradient(90deg,#0757b8,#19a8df,#16c997,#0a6155)!important;}
 
 /* Cartões públicos mais leves: a imagem continua protagonista, sem blocos gigantes. */
@@ -1457,10 +1446,16 @@ body,button,input,textarea,select{font-family:"Plus Jakarta Sans",system-ui,-app
 .product-modern-body{padding:15px!important}
 .product-modern-body h3{font-size:18px!important;margin:6px 0 5px!important}
 .product-modern-body>p{font-size:11.5px!important;line-height:1.62!important;min-height:0!important;color:#617783!important}
+.products-modern-grid{align-items:stretch!important}
+.product-modern-card{display:flex!important;flex-direction:column!important;min-height:0!important}
+.product-modern-image{flex:none!important}
+.product-modern-body{display:flex!important;flex:1!important;flex-direction:column!important;align-items:stretch!important}
+.product-modern-body>p{display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:4!important;overflow:hidden!important}
 .product-purpose{margin-top:9px!important;padding:8px 9px!important;border-radius:10px!important;background:#f4faf8!important;border:1px solid #e0eee9!important}
 .product-purpose span{display:block!important;font-size:7px!important;text-transform:uppercase!important;letter-spacing:.1em!important;font-weight:900!important;color:#0a8f83!important}
 .product-purpose strong{display:block!important;margin-top:2px!important;font-size:10px!important;line-height:1.35!important;color:#21495a!important}
-.product-modern-bottom{margin-top:11px!important;padding-top:10px!important}
+.product-modern-bottom{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;margin-top:auto!important;padding-top:12px!important}
+.product-modern-actions{display:flex!important;align-items:center!important;justify-content:flex-end!important;flex-wrap:wrap!important;gap:7px!important}
 .product-modern-bottom>span{font-size:8px!important}.product-modern-bottom button{min-height:31px!important;padding:0 9px!important;font-size:8.5px!important}
 
 .projects-modern-section{padding:60px 0!important}
@@ -2228,6 +2223,9 @@ main > section:not(#inicio) {
 .admin-search-empty{padding:14px!important;text-align:center!important;color:#80929e!important;font-size:10px!important}
 .admin-header-right{display:flex!important;align-items:center!important;gap:8px!important;margin-left:0!important;min-width:max-content!important}
 .admin-role-badge{padding:6px 9px!important;border:1px solid rgba(255,255,255,.16)!important;border-radius:999px!important;background:rgba(255,255,255,.08)!important;color:#e4f8f3!important;font-size:8px!important;font-weight:800!important;white-space:nowrap!important}
+.admin-header-page-button{display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:7px 10px!important;border:1px solid rgba(118,239,211,.35)!important;border-radius:999px!important;background:rgba(16,196,154,.14)!important;color:#eafcf7!important;font-size:8.5px!important;font-weight:700!important;letter-spacing:.06em!important;text-transform:uppercase!important;line-height:1!important;white-space:nowrap!important;cursor:pointer!important;transition:all .18s ease!important}
+.admin-header-page-button:hover{background:rgba(16,196,154,.22)!important;border-color:rgba(118,239,211,.6)!important;transform:translateY(-1px)!important}
+.admin-header-page-button:focus-visible{outline:none!important;box-shadow:0 0 0 3px rgba(118,239,211,.2)!important}
 .admin-header-page{font-size:9px!important;color:rgba(255,255,255,.62)!important;text-transform:capitalize!important;white-space:nowrap!important}
 .admin-header .icon-btn{width:36px!important;height:36px!important;display:grid!important;place-items:center!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:10px!important;background:rgba(255,255,255,.07)!important;color:#fff!important;cursor:pointer!important}
 .admin-header .icon-btn:hover{background:rgba(255,255,255,.14)!important}

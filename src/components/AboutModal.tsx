@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, Target, Rocket, HeartHandshake, Award, Globe, Users, ShieldCheck, Briefcase } from 'lucide-react';
 import { BilarLogo } from './BilarLogo';
-import { useSiteData } from '../context/SiteContext';
+import { resolveAssetUrl, useSiteData } from '../context/SiteContext';
 
 interface AboutModalProps {
   isOpen: boolean;
@@ -63,7 +63,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, onOpenQ
             <div className="bg-white p-4 rounded-xl border border-emerald-100 shadow-xs flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
                 <img
-                  src={companyInfo.aboutImage || '/bilar_hero_bilar_office.webp'}
+                  src={resolveAssetUrl(companyInfo.aboutImage || '/bilar_hero_bilar_office.webp')}
                   alt="George Fernando Bilar"
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover"
@@ -81,7 +81,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, onOpenQ
             <div className="bg-white p-4 rounded-xl border border-cyan-100 shadow-xs flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
                 <img
-                  src="/bilar_manager_profile_final.webp"
+                  src={resolveAssetUrl('/bilar_manager_profile_final.webp')}
                   alt="Bilar Fernando Bilar"
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover"

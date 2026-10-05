@@ -1,14 +1,15 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {LayoutDashboard,Building2,BriefcaseBusiness,FolderKanban,Users,UserRoundCog,FileText,Images,MessageSquare,ShieldCheck,Settings,LogOut,Menu,Plus,Search,Eye,Trash2,Edit3,Save,Upload,Download,RefreshCw,X,ExternalLink,FlaskConical,Package,WalletCards,Handshake,Repeat2,EyeOff,ArrowLeft,Mail,LockKeyhole} from 'lucide-react';
 import {BilarLogo} from '../components/BilarLogo';
-const DEFAULT_LOGIN_BACKGROUND='/admin/bilar_admin_tech_environment.webp';
-import {useSiteData} from '../context/SiteContext';
+import {resolveAssetUrl,useSiteData} from '../context/SiteContext';
 import {BilarProduct,BlogPost,Project,RevenueStream,Service,Specialist,TeamMember,LabProject,CareerOpening,Partner,ProductOperation,AdminRole} from '../types';
 import ContentExtrasEditor from '../components/ContentExtrasEditor';
 import {cloudinaryConfigured, uploadOptimizedImage} from '../lib/cloudinary';
 
 const nav=[['dashboard','Dashboard',LayoutDashboard],['empresa','Empresa',Building2],['servicos','Bilar Services',BriefcaseBusiness],['products','Bilar Products',Package],['labs','Bilar Labs',FlaskConical],['receitas','Receitas & Modelo',WalletCards],['projectos','Projectos & Casos',FolderKanban],['equipa','Equipa',Users],['carreiras','Carreiras',Users],['parceiros','Parceiros',Handshake],['especialistas','Especialistas',UserRoundCog],['blog','Insights',FileText],['media','Media Library',Images],['contactos','CRM / Leads',MessageSquare],['utilizadores','Utilizadores & Permissões',ShieldCheck],['configuracoes','Configurações',Settings]] as const;
-const imgFor=(p:Project)=>p.image||'/products/agro-sentinela.svg';
+const BASE_PATH = import.meta.env.BASE_URL || '/';
+const DEFAULT_LOGIN_BACKGROUND = `${BASE_PATH}admin/bilar_admin_tech_environment.webp`;
+const imgFor=(p:Project)=>resolveAssetUrl(p.image||'/products/agro-sentinela.svg');
 const statusLabel=(s:string)=>({published:'Publicado',draft:'Rascunho',archived:'Arquivado',new:'Novo',read:'Lido',replied:'Respondido'} as any)[s]||s;
 const Pill=({children,kind='blue'}:{children:React.ReactNode;kind?:string})=><span className={`admin-pill ${kind}`}>{children}</span>;
 const Modal=({title,onClose,children}:{title:string;onClose:()=>void;children:React.ReactNode})=><div className="admin-modal-backdrop"><div className="admin-modal"><div className="admin-modal-head"><div><div className="admin-eyebrow">Bilar DigitalTech</div><h2>{title}</h2></div><button onClick={onClose}><X/></button></div>{children}</div></div>;
@@ -81,7 +82,7 @@ function Header({page,query,setQuery,sidebar,setSidebar,onLogout,role,searchItem
  const searchInput=useRef<HTMLInputElement>(null);
  const results=query.trim()?searchItems.filter(x=>x.label.toLowerCase().includes(query.trim().toLowerCase())).slice(0,7):[];
  useEffect(()=>{const handleShortcut=(event:KeyboardEvent)=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'){event.preventDefault();searchInput.current?.focus();searchInput.current?.select();}if(event.key==='Escape'&&document.activeElement===searchInput.current){setQuery('');searchInput.current?.blur();}};window.addEventListener('keydown',handleShortcut);return()=>window.removeEventListener('keydown',handleShortcut)},[setQuery]);
- return <header className="admin-header"><div className="admin-header-left"><button className="icon-btn" aria-label="Menu" onClick={()=>setSidebar(!sidebar)}><Menu size={19}/></button><BilarLogo size="sm" theme="dark"/><div className="admin-header-context"><strong>Centro de Gestão</strong><span>Operações digitais Bilar</span></div></div><div className="admin-header-search-wrap"><div className="admin-header-search"><Search size={17}/><input ref={searchInput} value={query} onChange={e=>setQuery(e.target.value)} placeholder="Pesquisar no painel..." aria-label="Pesquisar no painel"/><kbd>Ctrl K</kbd></div>{query.trim()&&<div className="admin-search-results">{results.length?results.map((x,i)=><button key={`${x.id}-${i}`} onClick={()=>{onNavigate(x.id);setQuery('')}}><span className="search-result-icon"><Search size={13}/></span><span><strong>{x.label}</strong><small>{x.type}</small></span><ExternalLink size={13}/></button>):<div className="admin-search-empty">Nenhum resultado encontrado.</div>}</div>}</div><div className="admin-header-right"><span className="admin-role-badge">{role}</span><span className="admin-header-page">{page==='dashboard'?'Visão geral':page}</span><button className="icon-btn" aria-label="Terminar sessão" title="Terminar sessão" onClick={onLogout}><LogOut size={18}/></button></div></header>
+ return <header className="admin-header"><div className="admin-header-left"><button className="icon-btn" aria-label="Menu" onClick={()=>setSidebar(!sidebar)}><Menu size={19}/></button><BilarLogo size="sm" theme="dark"/><div className="admin-header-context"><strong>Centro de Gestão</strong><span>Operações digitais Bilar</span></div></div><div className="admin-header-search-wrap"><div className="admin-header-search"><Search size={17}/><input ref={searchInput} value={query} onChange={e=>setQuery(e.target.value)} placeholder="Pesquisar no painel..." aria-label="Pesquisar no painel"/><kbd>Ctrl K</kbd></div>{query.trim()&&<div className="admin-search-results">{results.length?results.map((x,i)=><button key={`${x.id}-${i}`} onClick={()=>{onNavigate(x.id);setQuery('')}}><span className="search-result-icon"><Search size={13}/></span><span><strong>{x.label}</strong><small>{x.type}</small></span><ExternalLink size={13}/></button>):<div className="admin-search-empty">Nenhum resultado encontrado.</div>}</div>}</div><div className="admin-header-right"><span className="admin-role-badge">{role}</span><button type="button" className="admin-header-page-button" onClick={()=>onNavigate('dashboard')} aria-label="Voltar para a visão geral">{page==='dashboard'?'Visão geral':page}</button><button className="icon-btn" aria-label="Terminar sessão" title="Terminar sessão" onClick={onLogout}><LogOut size={18}/></button></div></header>
 }
 function PageIntro({eyebrow,title,text,action}:{eyebrow?:string;title:string;text?:string;action?:React.ReactNode}){
  return <div className="admin-page-intro"><div><div className="admin-eyebrow">{eyebrow||'BILAR DIGITALTECH'}</div><h1>{title}</h1>{text&&<p>{text}</p>}</div>{action&&<div className="admin-page-intro-action">{action}</div>}</div>
@@ -99,7 +100,7 @@ function PersonModal({kind,item,close,save}:{kind:'team'|'specialist';item:any;c
    <Field label="Função" value={f.role||''} onChange={v=>setF({...f,role:v})}/>
    <Field label={kind==='team'?'Especialidade':'Área'} value={f.specialty||f.area||''} onChange={v=>setF({...f,[kind==='team'?'specialty':'area']:v})}/>
    {kind==='team'&&<Field label="Cargo de destaque" value={f.badge||''} onChange={v=>setF({...f,badge:v})} placeholder="Ex.: Liderança, Engenharia"/>}
-   {kind==='team'&&<Field label="Departamento" value={f.department||''} onChange={v=>setF({...f,department:v})}/>} 
+  {kind==='team'&&<Field label="Departamento" value={f.department||''} onChange={v=>setF({...f,department:v})}/>}
    {kind==='team'&&<Field label="Email" value={f.email||''} onChange={v=>setF({...f,email:v})} placeholder="nome@empresa.com"/>}
    {kind==='team'&&<Field label="Telefone" value={f.phone||''} onChange={v=>setF({...f,phone:v})} placeholder="+258 ..."/>}
   </div>

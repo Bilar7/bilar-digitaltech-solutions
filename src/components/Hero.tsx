@@ -1,6 +1,6 @@
 import React from 'react';
 import { Send, Play, ArrowRight } from 'lucide-react';
-import { useSiteData } from '../context/SiteContext';
+import { resolveAssetUrl, useSiteData } from '../context/SiteContext';
 
 interface HeroProps {
   onExploreServices: () => void;
@@ -20,7 +20,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreServices }) => {
       {/* Hero inteiro sobre uma única imagem: sem divisão entre texto e fotografia. */}
       <div className="absolute inset-0 z-0 overflow-hidden bg-[#071d2b]">
         <img
-          src={companyInfo.heroImage || '/bilar_hero_bilar_office.webp'}
+          src={resolveAssetUrl(companyInfo.heroImage || '/bilar_hero_bilar_office.webp')}
           alt="Bilar DigitalTech Solutions — ambiente profissional de trabalho"
           className="w-full h-full object-cover object-center bilar-reference-hero-image"
           loading="eager"

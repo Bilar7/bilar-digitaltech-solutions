@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ContentResources } from './ContentResources';
-import { useSiteData } from '../context/SiteContext';
+import { resolveAssetUrl, useSiteData } from '../context/SiteContext';
 import { useLanguage } from '../context/LanguageContext';
 import { serviceCopy } from '../i18n';
 import { Code2, Smartphone, LayoutDashboard, Cloud, ShieldCheck, Network, Globe, BrainCircuit, Palette, BriefcaseBusiness, Cpu, RadioTower, ArrowRight, ArrowUpRight, X, Send, CheckCircle } from 'lucide-react';
@@ -11,6 +11,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectServic
   const [selectedService, setSelectedService] = useState<any | null>(null);
   const { services: managedServices } = useSiteData();
   const { language, tr } = useLanguage();
+  const publicAsset = resolveAssetUrl;
   const iconMap: Record<string, any> = { Globe, Smartphone, LayoutDashboard, Cloud, ShieldCheck, Network, BrainCircuit, Palette, BriefcaseBusiness, Cpu, RadioTower, Code2 };
   // Fotografias contextuais reais (Unsplash). O SVG/local definido no conteúdo continua como fallback.
   const contextualImages: Record<string,string> = {
@@ -21,8 +22,8 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectServic
     seguranca:'https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&q=82&w=1200',
     redes:'https://images.unsplash.com/photo-1506399558188-acca6f8cbf41?auto=format&fit=crop&q=82&w=1200',
     ia:'https://images.unsplash.com/photo-1695144244472-a4543101ef35?auto=format&fit=crop&q=82&w=1200',
-    embebidos:'/services/embedded-systems.svg',
-    iot:'/services/internet-of-things.svg',
+    embebidos:publicAsset('services/embedded-systems.svg'),
+    iot:publicAsset('services/internet-of-things.svg'),
     design:'https://images.unsplash.com/photo-1764588037085-a78240016f8b?auto=format&fit=crop&q=82&w=1200',
     consultoria:'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&q=82&w=1200'
   };
@@ -32,7 +33,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectServic
     subtitle:serviceCopy[language][s.id]?.description || s.description,
     icon:iconMap[s.iconName] || Code2,
     accent:s.id==='web'?'blue':s.id==='mobile'?'green':s.id==='sistemas'?'violet':s.id==='cloud'?'cyan':s.id==='seguranca'?'red':s.id==='redes'?'orange':s.id==='ia'?'indigo':s.id==='embebidos'?'teal':s.id==='iot'?'sky':s.id==='design'?'pink':'gold',
-    image:contextualImages[s.id] || s.image || '/bilar_hero_bilar_office.webp',
+    image:contextualImages[s.id] || s.image || publicAsset('bilar_hero_bilar_office.webp'),
     features:s.features,
     extras:s.extras,
     price:s.price,
@@ -53,7 +54,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectServic
           const IconComponent = service.icon;
           return <article key={service.id} className={`service-modern-card service-accent-${service.accent}`}>
             <div className="service-card-media">
-              <img src={service.image} alt={service.title} loading="lazy" decoding="async" onError={(e) => { e.currentTarget.src = '/services/web.svg'; }} />
+              <img src={service.image} alt={service.title} loading="lazy" decoding="async" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = publicAsset('services/web-development.svg'); }} />
               <div className="service-card-media-overlay" />
               <div className="service-icon"><IconComponent className="w-5 h-5" /></div>
             </div>

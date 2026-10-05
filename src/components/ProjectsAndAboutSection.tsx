@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useSiteData } from '../context/SiteContext';
+import { resolveAssetUrl, useSiteData } from '../context/SiteContext';
 import { BilarProduct, Project } from '../types';
 import { ContentResources } from './ContentResources';
 import { ArrowRight, ArrowUpRight, ChevronLeft, ChevronRight, Trophy, Users, Star, ShieldCheck, Send, X, ExternalLink } from 'lucide-react';
@@ -32,7 +32,7 @@ export const ProjectsAndAboutSection: React.FC<ProjectsAndAboutSectionProps> = (
     id:p.id,
     title:p.title,
     category:p.subtitle || p.category,
-    image:p.image || '/products/agro-sentinela.svg',
+    image:resolveAssetUrl(p.image || '/products/agro-sentinela.svg'),
     description:p.description,
     technologies:p.technologies,
     client:p.client,
@@ -64,7 +64,7 @@ export const ProjectsAndAboutSection: React.FC<ProjectsAndAboutSectionProps> = (
     <section id="sobre" className="about-modern-section">
       <div className="about-modern-shell">
         <div className="about-modern-visual">
-          <img src={companyInfo.aboutImage || '/bilar_hero_bilar_office.webp'} alt="Bilar DigitalTech Solutions — empresa e ambiente de trabalho" loading="lazy" decoding="async" />
+          <img src={resolveAssetUrl(companyInfo.aboutImage || '/bilar_hero_bilar_office.webp')} alt="Bilar DigitalTech Solutions — empresa e ambiente de trabalho" loading="lazy" decoding="async" />
           <div className="about-modern-badge"><Trophy className="w-4 h-4" /><span>{companyInfo.location || 'Moçambique'}</span><small>Base de operação</small></div>
         </div>
         <div className="about-modern-copy">
@@ -92,7 +92,7 @@ export const ProjectsAndAboutSection: React.FC<ProjectsAndAboutSectionProps> = (
         </div>
         <div className="products-modern-grid">
           {products.map(product => <article key={product.id} className="product-modern-card">
-            <div className="product-modern-image"><img src={product.image || '/bilar_hero_bilar_office.webp'} alt={product.name} loading="lazy" decoding="async" /><div className="product-status-pill">{statusLabel(product.status)}</div></div>
+            <div className="product-modern-image"><img src={resolveAssetUrl(product.image || '/bilar_hero_bilar_office.webp')} alt={product.name} loading="lazy" decoding="async" /><div className="product-status-pill">{statusLabel(product.status)}</div></div>
             <div className="product-modern-body">
               <div className="product-category">{product.category}</div>
               <h3>{product.name}</h3>
@@ -127,7 +127,7 @@ export const ProjectsAndAboutSection: React.FC<ProjectsAndAboutSectionProps> = (
     {selectedProduct && <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={() => setSelectedProduct(null)}>
       <div className="product-detail-modal" onClick={e => e.stopPropagation()}>
         <button onClick={() => setSelectedProduct(null)} aria-label="Fechar produto" className="modal-close-button"><X className="w-5 h-5" /></button>
-        <div className="product-detail-media"><img src={selectedProduct.image || '/bilar_hero_bilar_office.webp'} alt={selectedProduct.name} /><div className="product-detail-media-overlay" /><div><span>BILAR PRODUCT · {selectedProduct.category}</span><h3>{selectedProduct.name}</h3></div></div>
+        <div className="product-detail-media"><img src={resolveAssetUrl(selectedProduct.image || '/bilar_hero_bilar_office.webp')} alt={selectedProduct.name} /><div className="product-detail-media-overlay" /><div><span>BILAR PRODUCT · {selectedProduct.category}</span><h3>{selectedProduct.name}</h3></div></div>
         <div className="product-detail-body"><div className="product-detail-lead">{selectedProduct.promotion || selectedProduct.description}</div><p>{selectedProduct.description}</p><div className="product-detail-info-grid"><div><small>Público</small><strong>{selectedProduct.audience || 'Empresas e utilizadores'}</strong></div><div><small>Modelo</small><strong>{selectedProduct.price || 'Sob consulta'}</strong></div></div><ContentResources extras={selectedProduct.extras} onRequestDemo={onOpenQuoteModal} /><div className="product-detail-links">{selectedProduct.appUrl && <a className="primary" href={selectedProduct.appUrl} target="_blank" rel="noopener noreferrer" onClick={()=>setSelectedProduct(null)}>Abrir aplicação <ExternalLink className="w-4 h-4" /></a>}{!selectedProduct.appUrl && selectedProduct.websiteUrl && <a className="primary" href={selectedProduct.websiteUrl} target="_blank" rel="noopener noreferrer" onClick={()=>setSelectedProduct(null)}>Abrir página <ExternalLink className="w-4 h-4" /></a>}{selectedProduct.documentationUrl && <a href={selectedProduct.documentationUrl} target="_blank" rel="noopener noreferrer">Documentação</a>}{selectedProduct.supportUrl && <a href={selectedProduct.supportUrl} target="_blank" rel="noopener noreferrer">Suporte</a>}{!selectedProduct.appUrl && !selectedProduct.websiteUrl && <button className="primary" onClick={()=>{setSelectedProduct(null); onOpenQuoteModal();}}>Quero saber mais <ArrowRight className="w-4 h-4" /></button>}<button onClick={()=>setSelectedProduct(null)}>Fechar</button></div></div>
       </div>
     </div>}

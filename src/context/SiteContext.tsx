@@ -5,11 +5,54 @@ import {firebaseAuth,firebaseDb,firebaseConfigured,adminBootstrapEmail,createSec
 import {COMPANY_INFO as DEFAULT_COMPANY_INFO,BLOG_POSTS as DEFAULT_BLOG_POSTS,TEAM_MEMBERS as DEFAULT_TEAM_MEMBERS,PROJECTS as DEFAULT_PROJECTS,SERVICES as DEFAULT_SERVICES} from '../data/content';
 import {AdminRole,AdminUser,BlogPost,ContactMessage,MediaAsset,Project,Service,Specialist,TeamMember,BilarProduct,RevenueStream,AdminSettings,LabProject,CareerOpening,Partner,ProductOperation} from '../types';
 
+const ADMIN_BASE_PATH = import.meta.env.BASE_URL || '/';
+const DEFAULT_LOGIN_BACKGROUND = `${ADMIN_BASE_PATH}admin/bilar_admin_tech_environment.webp`;
+
+export const resolveAssetUrl=(value?:string)=>{
+  if (!value) return '';
+  if (/^(https?:)?\/\//i.test(value) || value.startsWith('data:') || value.startsWith('blob:') || value.startsWith('#')) return value;
+
+  const base=import.meta.env.BASE_URL || '/';
+  const basePath=base.replace(/^\/+|\/+$/g, '');
+  let path=value.replace(/^\/+/, '');
+
+  if(basePath){
+    const prefix=`${basePath}/`;
+    while(path===basePath || path.startsWith(prefix)){
+      path=path===basePath?'':path.slice(prefix.length);
+    }
+  }
+
+  return `${base}${path}`;
+};
+
 export interface CompanyInfo {name:string;shortName:string;tagline:string;badge:string;heroTitle:string;heroImage?:string;heroSubtitle:string;founder:string;founderRole:string;manager:string;managerRole:string;phone:string;whatsappUrl:string;email:string;secondaryEmail:string;location:string;stats:{value:string;label:string;icon:string}[];instagram?:string;linkedin?:string;youtube?:string;facebook?:string;tiktok?:string;x?:string;footerDescription?:string;footerCtaText?:string;footerCtaUrl?:string;footerNavLinks?:string;aboutImage?:string;aboutTitle?:string;aboutDescription?:string;aboutQuote?:string;aboutSignature?:string;}
 interface SiteData {companyInfo:CompanyInfo;bilarProducts:BilarProduct[];revenueStreams:RevenueStream[];blogPosts:BlogPost[];teamMembers:TeamMember[];projects:Project[];services:Service[];specialists:Specialist[];contactMessages:ContactMessage[];mediaAssets:MediaAsset[];careerOpenings:CareerOpening[];partners:Partner[];adminSettings:AdminSettings;}
 export interface AuthResult {ok:boolean;message?:string;}
 interface SiteContextType extends SiteData {currentAdminRole:AdminRole|null;mustChangePassword:boolean;labProjects:LabProject[];productOperations:ProductOperation[];adminUsers:AdminUser[];isAdminAuthenticated:boolean;firebaseReady:boolean;authReady:boolean;loginAdmin:(email:string,password:string)=>Promise<AuthResult>;loginAdminWithGoogle:()=>Promise<AuthResult>;resetAdminPassword:(email:string)=>Promise<AuthResult>;changeFirstPassword:(newPassword:string)=>Promise<AuthResult>;logoutAdmin:()=>void;updateCompanyInfo:(u:Partial<CompanyInfo>)=>Promise<void>;updateAdminSettings:(u:Partial<AdminSettings>)=>Promise<void>;addProduct:(p:Omit<BilarProduct,'id'>,operation?:Pick<ProductOperation,'adminUrl'>)=>Promise<void>;updateProduct:(id:string,p:Partial<BilarProduct>,operation?:Pick<ProductOperation,'adminUrl'>)=>Promise<void>;deleteProduct:(id:string)=>Promise<void>;addRevenueStream:(p:Omit<RevenueStream,'id'>)=>Promise<void>;updateRevenueStream:(id:string,p:Partial<RevenueStream>)=>Promise<void>;deleteRevenueStream:(id:string)=>Promise<void>;addBlogPost:(p:Omit<BlogPost,'id'>)=>Promise<void>;updateBlogPost:(id:string,p:Partial<BlogPost>)=>Promise<void>;deleteBlogPost:(id:string)=>Promise<void>;addTeamMember:(p:Omit<TeamMember,'id'>)=>Promise<void>;updateTeamMember:(id:string,p:Partial<TeamMember>)=>Promise<void>;deleteTeamMember:(id:string)=>Promise<void>;addService:(p:Omit<Service,'id'>)=>Promise<void>;updateService:(id:string,p:Partial<Service>)=>Promise<void>;deleteService:(id:string)=>Promise<void>;addProject:(p:Omit<Project,'id'>)=>Promise<void>;updateProject:(id:string,p:Partial<Project>)=>Promise<void>;deleteProject:(id:string)=>Promise<void>;addSpecialist:(p:Omit<Specialist,'id'>)=>Promise<void>;updateSpecialist:(id:string,p:Partial<Specialist>)=>Promise<void>;deleteSpecialist:(id:string)=>Promise<void>;addContactMessage:(p:Omit<ContactMessage,'id'|'createdAt'|'status'>)=>Promise<void>;updateContactStatus:(id:string,status:ContactMessage['status'])=>Promise<void>;deleteContactMessage:(id:string)=>Promise<void>;addMedia:(p:Omit<MediaAsset,'id'|'createdAt'>)=>Promise<void>;deleteMedia:(id:string)=>Promise<void>;updateAdminUser:(id:string,p:Partial<AdminUser>)=>Promise<void>;deleteAdminUser:(id:string)=>Promise<void>;createAdminAccess:(name:string,email:string,role:AdminRole)=>Promise<{email:string;role:AdminRole;inviteUrl:string;tempPassword:string}>;resendAdminCredentials:(uid:string)=>Promise<{email:string;role:AdminRole;inviteUrl:string;tempPassword:string}>;addLabProject:(p:Omit<LabProject,'id'|'createdAt'|'updatedAt'>)=>Promise<void>;updateLabProject:(id:string,p:Partial<LabProject>)=>Promise<void>;deleteLabProject:(id:string)=>Promise<void>;addCareerOpening:(p:Omit<CareerOpening,'id'>)=>Promise<void>;updateCareerOpening:(id:string,p:Partial<CareerOpening>)=>Promise<void>;deleteCareerOpening:(id:string)=>Promise<void>;addPartner:(p:Omit<Partner,'id'>)=>Promise<void>;updatePartner:(id:string,p:Partial<Partner>)=>Promise<void>;deletePartner:(id:string)=>Promise<void>;exportBackupJson:()=>void;importBackupJson:(s:string)=>Promise<boolean>;resetAllToDefaults:()=>Promise<void>;}
 const Ctx=createContext<SiteContextType|undefined>(undefined);
+const normalizeAssetTree=(input:any):any=>{
+  if (!input || typeof input !== 'object') return input;
+  if (Array.isArray(input)) return input.map(normalizeAssetTree);
+
+  const next:Record<string, any> = {};
+  Object.entries(input).forEach(([key, value]) => {
+    if (typeof value === 'string' && /\.(png|jpe?g|webp|svg|gif|avif|ico)(\?.*)?$/i.test(value) && !value.startsWith('data:')) {
+      next[key] = resolveAssetUrl(value);
+      return;
+    }
+    if (typeof value === 'string' && /\.(png|jpe?g|webp|svg|gif|avif|ico)(\?.*)?$/i.test(value) && value.startsWith('data:')) {
+      next[key] = value;
+      return;
+    }
+    if (typeof value === 'string' && /\.(png|jpe?g|webp|svg|gif|avif|ico)(\?.*)?$/i.test(value) === false && (key === 'image' || key === 'avatar' || key === 'coverImage' || key === 'logo' || key === 'url')) {
+      next[key] = resolveAssetUrl(value);
+      return;
+    }
+    next[key] = normalizeAssetTree(value);
+  });
+  return next;
+};
 const defaults:SiteData={
   companyInfo:{...DEFAULT_COMPANY_INFO},
   bilarProducts:[
@@ -41,7 +84,7 @@ const defaults:SiteData={
     {id:'media-agro',name:'Agro-Sentinela',url:'/products/agro-sentinela.svg',type:'project',createdAt:'Produto Bilar'},
     {id:'media-poultry',name:'Bilar Smart Poultry',url:'/products/smart-poultry.svg',type:'project',createdAt:'Produto Bilar'}
   ],
-  adminSettings:{loginBackground:'/admin/bilar_admin_tech_environment.webp',dashboardBackground:'',dashboardLayout:'corporate',accent:'blue-green',density:'comfortable',welcomeTitle:'Centro de Gestão Bilar',welcomeText:'Gira o conteúdo público, os produtos, os projectos, a equipa e as operações da Bilar.',showStats:true}
+  adminSettings:{loginBackground:DEFAULT_LOGIN_BACKGROUND,dashboardBackground:'',dashboardLayout:'corporate',accent:'blue-green',density:'comfortable',welcomeTitle:'Centro de Gestão Bilar',welcomeText:'Gira o conteúdo público, os produtos, os projectos, a equipa e as operações da Bilar.',showStats:true}
 };
 
 // Conteúdo editorial inicial para o lançamento público.
@@ -93,23 +136,23 @@ const normalize=(saved:any):SiteData=>{
   delete (companyInfo as any).bilarMoveUrl;
   delete (companyInfo as any).bilarMoveAdminUrl;
   return {
-    companyInfo,
+    companyInfo:normalizeAssetTree(companyInfo),
     bilarProducts:(pick(x.bilarProducts,defaults.bilarProducts) ?? []).map((product:any)=>{
       const legacyWebsite=product.websiteUrl ?? product.url ?? '';
       const {url:_legacyUrl,adminUrl:_legacyAdminUrl,...cleanProduct}=product;
-      return {...cleanProduct,websiteUrl:legacyWebsite,appUrl:product.appUrl ?? '',supportUrl:product.supportUrl ?? '',documentationUrl:product.documentationUrl ?? ''};
+      return normalizeAssetTree({...cleanProduct,websiteUrl:legacyWebsite,appUrl:product.appUrl ?? '',supportUrl:product.supportUrl ?? '',documentationUrl:product.documentationUrl ?? ''});
     }),
-    revenueStreams:pick(x.revenueStreams,defaults.revenueStreams) ?? [],
-    blogPosts:pick(x.blogPosts,defaults.blogPosts) ?? [],
-    teamMembers:pick(x.teamMembers,defaults.teamMembers) ?? [],
-    projects:pick(x.projects,defaults.projects) ?? [],
-    services:normalizeServices(x.services),
-    specialists:pick(x.specialists,defaults.specialists) ?? [],
-    contactMessages:pick(x.contactMessages,defaults.contactMessages) ?? [],
-    mediaAssets:pick(x.mediaAssets,defaults.mediaAssets) ?? [],
-    careerOpenings:pick(x.careerOpenings,defaults.careerOpenings) ?? [],
-    partners:pick(x.partners,defaults.partners) ?? [],
-    adminSettings:{...defaults.adminSettings,...(x.adminSettings||{}),dashboardLayout:x.adminSettings?.dashboardLayout==='operations'?'operations':'corporate',loginBackground:x.adminSettings?.loginBackground||defaults.adminSettings.loginBackground}
+    revenueStreams:normalizeAssetTree(pick(x.revenueStreams,defaults.revenueStreams) ?? []),
+    blogPosts:normalizeAssetTree(pick(x.blogPosts,defaults.blogPosts) ?? []),
+    teamMembers:normalizeAssetTree(pick(x.teamMembers,defaults.teamMembers) ?? []),
+    projects:normalizeAssetTree(pick(x.projects,defaults.projects) ?? []),
+    services:normalizeAssetTree(normalizeServices(x.services)),
+    specialists:normalizeAssetTree(pick(x.specialists,defaults.specialists) ?? []),
+    contactMessages:normalizeAssetTree(pick(x.contactMessages,defaults.contactMessages) ?? []),
+    mediaAssets:normalizeAssetTree(pick(x.mediaAssets,defaults.mediaAssets) ?? []),
+    careerOpenings:normalizeAssetTree(pick(x.careerOpenings,defaults.careerOpenings) ?? []),
+    partners:normalizeAssetTree(pick(x.partners,defaults.partners) ?? []),
+    adminSettings:{...defaults.adminSettings,...(x.adminSettings||{}),dashboardLayout:x.adminSettings?.dashboardLayout==='operations'?'operations':'corporate',loginBackground:resolveAssetUrl(x.adminSettings?.loginBackground || defaults.adminSettings.loginBackground)}
   };
 };
 
