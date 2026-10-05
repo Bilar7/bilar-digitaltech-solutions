@@ -14,7 +14,7 @@ export const resolveAssetUrl=(value?:string)=>{
 
   const base=import.meta.env.BASE_URL || '/';
   const basePath=base.replace(/^\/+|\/+$/g, '');
-  let path=value.replace(/^\/+/, '');
+  let path=value.replace(/(^|\/)\.\//g, '$1').replace(/^\/+/, '');
 
   if(basePath){
     const prefix=`${basePath}/`;
