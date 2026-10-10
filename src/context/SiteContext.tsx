@@ -347,7 +347,7 @@ export const SiteProvider:React.FC<{children:React.ReactNode}>=({children})=>{
  },[isAdminAuthenticated,currentAdminRole]);
  const updateAdminUser=async(id:string,p:Partial<AdminUser>)=>{requireAdmin();if(currentAdminRole!=='Super Admin')throw new Error('Apenas o Super Admin pode gerir contas.');if(user?.uid===id&&(p.active===false||p.role&&p.role!=='Super Admin'))throw new Error('Não pode suspender nem alterar a função da conta em uso.');await updateDoc(doc(firebaseDb!,'admins',id),p);};
  const deleteAdminUser=async(id:string)=>{requireAdmin();if(currentAdminRole!=='Super Admin')throw new Error('Apenas o Super Admin pode remover contas.');if(user?.uid===id)throw new Error('Não é possível remover a conta que está em uso.');await deleteDoc(doc(firebaseDb!,'admins',id));};
- const generateTemporaryPassword=()=>{
+ const generateTemporaryPassword=(name:string)=>{
    const chars='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
    const digits=new Uint32Array(4); crypto.getRandomValues(digits);
    const suffixValues=new Uint32Array(10); crypto.getRandomValues(suffixValues);
