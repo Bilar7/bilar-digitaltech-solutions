@@ -20,7 +20,7 @@ export interface BlogComment { id:string; author:string; date:string; text:strin
 export interface ContactMessage { id:string; name:string; email:string; phone?:string; company?:string; country?:string; interestType?:string; budget?:string; timeline?:string; message:string; createdAt:string; status:'new'|'read'|'replied'|'archived'; }
 export interface MediaAsset { id:string; name:string; url:string; type:'logo'|'team'|'project'|'blog'|'institutional'|'banner'; category?:string; createdAt:string; }
 export type AdminRole='Super Admin'|'Admin'|'Editor'|'Team Manager';
-export interface AdminUser { id:string; name:string; username:string; email?:string; role:AdminRole; active:boolean; createdAt:string; }
+export interface AdminUser { id:string; name:string; username:string; email?:string; role:AdminRole; active:boolean; createdAt:string; salary?:number|null; salaryCurrency?:string|null; }
 export type ProductStatus='research'|'prototype'|'testing'|'available'|'soon';
 export interface BilarProduct { id:string; name:string; category:string; description:string; problem:string; benefits:string[]; features:string[]; audience:string; businessModel:string; price:string; promotion:string; image?:string; status:ProductStatus; featured?:boolean; active?:boolean; websiteUrl?:string; appUrl?:string; supportUrl?:string; documentationUrl?:string; extras?:ContentExtras; }
 export interface ProductOperation { productId:string; adminUrl:string; updatedAt:string; }

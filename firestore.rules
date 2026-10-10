@@ -36,7 +36,7 @@ service cloud.firestore {
           && request.resource.data.role == 'Super Admin'
           && request.resource.data.active == true);
 
-      allow read: if isAdmin() || (verified() && request.auth.uid == uid);
+      allow read: if isSuperAdmin() || (verified() && request.auth.uid == uid);
 
       allow update: if isSuperAdmin()
         || (verified()

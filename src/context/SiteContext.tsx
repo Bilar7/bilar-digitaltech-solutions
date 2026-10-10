@@ -1,5 +1,5 @@
 import React,{createContext,useContext,useEffect,useMemo,useState} from 'react';
-import {collection,doc,getDoc,getDocs,onSnapshot,setDoc,addDoc,updateDoc,deleteDoc} from 'firebase/firestore';
+import {collection,doc,getDoc,getDocs,onSnapshot,setDoc,addDoc,updateDoc,deleteDoc,DocumentSnapshot} from 'firebase/firestore';
 import {onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendEmailVerification,sendPasswordResetEmail,signOut,updateProfile,updatePassword,User,GoogleAuthProvider,signInWithPopup} from 'firebase/auth';
 import {firebaseAuth,firebaseDb,firebaseConfigured,adminBootstrapEmail,createSecondaryAuth} from '../lib/firebase';
 import {COMPANY_INFO as DEFAULT_COMPANY_INFO,BLOG_POSTS as DEFAULT_BLOG_POSTS,TEAM_MEMBERS as DEFAULT_TEAM_MEMBERS,PROJECTS as DEFAULT_PROJECTS,SERVICES as DEFAULT_SERVICES} from '../data/content';
@@ -102,7 +102,7 @@ defaults.companyInfo.aboutSignature='Bilar DigitalTech Solutions';
 defaults.companyInfo.footerDescription='Empresa de inovação e tecnologia dedicada a criar produtos, serviços e soluções digitais com valor real.';
 
 const clone=(x:any)=>JSON.parse(JSON.stringify(x));
-const ensureAdminProfile=async(currentUser:User)=>{
+const ensureAdminProfile=async(currentUser:User):Promise<DocumentSnapshot|null>=>{
   if(!firebaseDb||!currentUser.emailVerified||!currentUser.email)return null;
   const email=currentUser.email.trim().toLowerCase();
   const adminRef=doc(firebaseDb,'admins',currentUser.uid);
@@ -184,7 +184,8 @@ export const SiteProvider:React.FC<{children:React.ReactNode}>=({children})=>{
        if(!adminSnap) adminSnap=await getDoc(doc(firebaseDb,'admins',currentUser.uid));
        if(!adminSnap.exists() || adminSnap.data().active===false){await signOut(firebaseAuth);setAuth(false);setCurrentAdminRole(null);setMustChangePassword(false);setProductOperations([]);setAdminUsers([]);setLabProjects([]);setAuthReady(true);return;}
        setAuth(true);
-       setCurrentAdminRole((adminSnap.data().role||'Editor') as AdminRole);
+      const role=(adminSnap.data().role||'Editor') as AdminRole;
+      setCurrentAdminRole(role);
        setMustChangePassword(adminSnap.data().mustChangePassword===true);
        const siteRef=doc(firebaseDb,'site','main');
        const siteSnap=await getDoc(siteRef);
@@ -203,8 +204,10 @@ export const SiteProvider:React.FC<{children:React.ReactNode}>=({children})=>{
            await setDoc(doc(firebaseDb,'productOperations',moveId),{productId:moveId,adminUrl:String(legacyCompany.bilarMoveAdminUrl),updatedAt:new Date().toISOString()},{merge:true});
          }
        }
-       const admins=await getDocs(collection(firebaseDb,'admins'));
-       setAdminUsers(admins.docs.map(item=>({id:item.id,...item.data()} as AdminUser)));
+       if(role==='Super Admin'){
+         const admins=await getDocs(collection(firebaseDb,'admins'));
+         setAdminUsers(admins.docs.map(item=>({id:item.id,...item.data()} as AdminUser)));
+       }else setAdminUsers([]);
      }catch{setAuth(false);}
      finally{if(alive)setAuthReady(true);}
    });
@@ -277,7 +280,19 @@ export const SiteProvider:React.FC<{children:React.ReactNode}>=({children})=>{
    if(!firebaseConfigured||!firebaseAuth||!firebaseDb)return {ok:false,message:'O Firebase ainda não está configurado para esta instalação.'};
    try{
      const cred=await signInWithEmailAndPassword(firebaseAuth,email.trim(),password);
-     if(!cred.user.emailVerified){try{await sendEmailVerification(cred.user);}catch(_error){} await signOut(firebaseAuth);return {ok:false,message:'O seu email ainda não foi confirmado. Enviámos novamente a mensagem de confirmação para o seu email. Verifique também Spam/Lixo eletrónico.'};}
+     await cred.user.reload();
+     await cred.user.getIdToken(true);
+     if(!cred.user.emailVerified){
+       let message='O email ainda não está confirmado. Abra o link de confirmação e depois volte a entrar. Verifique também Spam/Lixo eletrónico.';
+       try{
+         await sendEmailVerification(cred.user);
+         message='O email ainda não está confirmado. Enviámos um novo link; abra-o e depois volte a entrar. Verifique também Spam/Lixo eletrónico.';
+       }catch(error:any){
+         message=`O email ainda não está confirmado e não foi possível reenviar o link. ${friendlyAuthError(error?.code||'')}`;
+       }
+       await signOut(firebaseAuth);
+       return {ok:false,message};
+     }
      let adminSnap=await ensureAdminProfile(cred.user);
      if(!adminSnap) adminSnap=await getDoc(doc(firebaseDb,'admins',cred.user.uid));
      if(!adminSnap.exists()||adminSnap.data().active===false){await signOut(firebaseAuth);return {ok:false,message:'Esta conta está autenticada, mas não tem permissão de acesso à Gestão Bilar.'};}
@@ -292,7 +307,7 @@ export const SiteProvider:React.FC<{children:React.ReactNode}>=({children})=>{
      const cred=await signInWithPopup(firebaseAuth,provider);
      if(!cred.user.emailVerified){await signOut(firebaseAuth);return {ok:false,message:'Confirme a sua conta Google e tente novamente.'};}
      const adminSnap=await ensureAdminProfile(cred.user);
-     if(!adminSnap||adminSnap.data().active===false){await signOut(firebaseAuth);return {ok:false,message:'Esta conta Google não tem acesso autorizado à Gestão Bilar. Peça um convite a um administrador.'};}
+    if(!adminSnap||!adminSnap.exists()||adminSnap.data().active===false){await signOut(firebaseAuth);return {ok:false,message:'Esta conta Google não tem acesso autorizado à Gestão Bilar. Peça um convite a um administrador.'};}
      setAuth(true);return {ok:true};
    }catch(error:any){return {ok:false,message:friendlyAuthError(error?.code||'')};}
  };
@@ -327,15 +342,20 @@ export const SiteProvider:React.FC<{children:React.ReactNode}>=({children})=>{
    return onSnapshot(collection(firebaseDb,'contactMessages'),snap=>setData(current=>({...current,contactMessages:snap.docs.map(x=>({id:x.id,...x.data()} as ContactMessage))})));
  },[isAdminAuthenticated]);
  useEffect(()=>{
-   if(!firebaseConfigured||!firebaseDb||!isAdminAuthenticated)return;
+   if(!firebaseConfigured||!firebaseDb||!isAdminAuthenticated||currentAdminRole!=='Super Admin'){setAdminUsers([]);return;}
    return onSnapshot(collection(firebaseDb,'admins'),snap=>setAdminUsers(snap.docs.map(item=>({id:item.id,...item.data()} as AdminUser))));
- },[isAdminAuthenticated]);
- const updateAdminUser=async(id:string,p:Partial<AdminUser>)=>{requireAdmin();await updateDoc(doc(firebaseDb!,'admins',id),p);};
- const deleteAdminUser=async(id:string)=>{requireAdmin();if(user?.uid===id)throw new Error('Não é possível remover a conta que está em uso.');await deleteDoc(doc(firebaseDb!,'admins',id));};
+ },[isAdminAuthenticated,currentAdminRole]);
+ const updateAdminUser=async(id:string,p:Partial<AdminUser>)=>{requireAdmin();if(currentAdminRole!=='Super Admin')throw new Error('Apenas o Super Admin pode gerir contas.');if(user?.uid===id&&(p.active===false||p.role&&p.role!=='Super Admin'))throw new Error('Não pode suspender nem alterar a função da conta em uso.');await updateDoc(doc(firebaseDb!,'admins',id),p);};
+ const deleteAdminUser=async(id:string)=>{requireAdmin();if(currentAdminRole!=='Super Admin')throw new Error('Apenas o Super Admin pode remover contas.');if(user?.uid===id)throw new Error('Não é possível remover a conta que está em uso.');await deleteDoc(doc(firebaseDb!,'admins',id));};
  const generateTemporaryPassword=()=>{
    const chars='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
-   const values=new Uint32Array(14); crypto.getRandomValues(values);
-   return Array.from(values,v=>chars[v%chars.length]).join('');
+   const digits=new Uint32Array(4); crypto.getRandomValues(digits);
+   const suffixValues=new Uint32Array(10); crypto.getRandomValues(suffixValues);
+   const companyInitials='BDS';
+   const digitCode=Array.from(digits,value=>value%10).join('');
+   const nameInitial=name.trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').charAt(0).toUpperCase()||'X';
+   const secureSuffix=Array.from(suffixValues,value=>chars[value%chars.length]).join('');
+   return `${companyInitials}-${digitCode}-${nameInitial}-${secureSuffix}`;
  };
  const createAdminAccess=async(name:string,email:string,role:AdminRole)=>{
    requireAdmin();
@@ -346,7 +366,7 @@ export const SiteProvider:React.FC<{children:React.ReactNode}>=({children})=>{
    if(!firebaseDb)throw new Error('Firebase Firestore não está disponível.');
    const existing=await getDocs(collection(firebaseDb,'admins'));
    if(existing.docs.some(x=>String(x.data().email||x.data().username||'').toLowerCase()===normalizedEmail))throw new Error('Já existe um utilizador Bilar com este email.');
-   const tempPassword=generateTemporaryPassword();
+  const tempPassword=generateTemporaryPassword(name);
    const secondaryAuth=createSecondaryAuth();
    try{
      const cred=await createUserWithEmailAndPassword(secondaryAuth,normalizedEmail,tempPassword);
