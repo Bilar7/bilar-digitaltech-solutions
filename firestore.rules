@@ -18,17 +18,42 @@ service cloud.firestore {
       return isAdmin()
         && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role in ['Super Admin','Admin','Editor'];
     }
+    function canManageMarketing() {
+      return isAdmin()
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role in ['Super Admin','Admin','Marketing'];
+    }
+    function canEditMarketingSocialLinks() {
+      return isAdmin()
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'Marketing'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['companyInfo'])
+        && request.resource.data.companyInfo.diff(resource.data.companyInfo).affectedKeys().hasOnly(['facebook','instagram','linkedin','youtube','tiktok','x']);
+    }
 
     match /site/main {
       allow read: if true;
-      allow write: if canEditContent();
+      allow write: if canEditContent() || canEditMarketingSocialLinks();
+    }
+
+    match /marketingPosts/{postId} {
+      allow read: if canManageMarketing();
+      allow create: if canManageMarketing()
+        && request.resource.data.status == 'draft'
+        && request.resource.data.keys().hasOnly(['id','title','copy','mediaUrl','channels','status','createdAt','updatedAt','createdBy'])
+        && request.resource.data.title is string
+        && request.resource.data.copy is string
+        && request.resource.data.channels is list;
+      allow update: if canManageMarketing()
+        && resource.data.status == 'draft'
+        && request.resource.data.status == 'draft'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title','copy','mediaUrl','channels','updatedAt']);
+      allow delete: if canManageMarketing();
     }
 
     match /admins/{uid} {
       // O Super Admin cria os perfis dos colaboradores.
       allow create: if (isSuperAdmin()
           && !exists(/databases/$(database)/documents/admins/$(uid))
-          && request.resource.data.role in ['Admin','Editor','Team Manager']
+          && request.resource.data.role in ['Admin','Editor','Team Manager','Marketing']
           && request.resource.data.active == true)
         || (verified()
           && request.auth.uid == uid

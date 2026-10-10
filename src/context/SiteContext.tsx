@@ -3,7 +3,7 @@ import {collection,doc,getDoc,getDocs,onSnapshot,setDoc,addDoc,updateDoc,deleteD
 import {onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendEmailVerification,sendPasswordResetEmail,signOut,updateProfile,updatePassword,User,GoogleAuthProvider,signInWithPopup} from 'firebase/auth';
 import {firebaseAuth,firebaseDb,firebaseConfigured,adminBootstrapEmail,createSecondaryAuth} from '../lib/firebase';
 import {COMPANY_INFO as DEFAULT_COMPANY_INFO,BLOG_POSTS as DEFAULT_BLOG_POSTS,TEAM_MEMBERS as DEFAULT_TEAM_MEMBERS,PROJECTS as DEFAULT_PROJECTS,SERVICES as DEFAULT_SERVICES} from '../data/content';
-import {AdminRole,AdminUser,BlogPost,ContactMessage,MediaAsset,Project,Service,Specialist,TeamMember,BilarProduct,RevenueStream,AdminSettings,LabProject,CareerOpening,Partner,ProductOperation} from '../types';
+import {AdminRole,AdminUser,BlogPost,ContactMessage,MediaAsset,Project,Service,Specialist,TeamMember,BilarProduct,RevenueStream,AdminSettings,LabProject,CareerOpening,Partner,ProductOperation,MarketingPost} from '../types';
 
 const ADMIN_BASE_PATH = import.meta.env.BASE_URL || '/';
 const DEFAULT_LOGIN_BACKGROUND = `${ADMIN_BASE_PATH}admin/bilar_admin_tech_environment.webp`;
@@ -30,6 +30,13 @@ export interface CompanyInfo {name:string;shortName:string;tagline:string;badge:
 interface SiteData {companyInfo:CompanyInfo;bilarProducts:BilarProduct[];revenueStreams:RevenueStream[];blogPosts:BlogPost[];teamMembers:TeamMember[];projects:Project[];services:Service[];specialists:Specialist[];contactMessages:ContactMessage[];mediaAssets:MediaAsset[];careerOpenings:CareerOpening[];partners:Partner[];adminSettings:AdminSettings;}
 export interface AuthResult {ok:boolean;message?:string;}
 interface SiteContextType extends SiteData {currentAdminRole:AdminRole|null;mustChangePassword:boolean;labProjects:LabProject[];productOperations:ProductOperation[];adminUsers:AdminUser[];isAdminAuthenticated:boolean;firebaseReady:boolean;authReady:boolean;loginAdmin:(email:string,password:string)=>Promise<AuthResult>;loginAdminWithGoogle:()=>Promise<AuthResult>;resetAdminPassword:(email:string)=>Promise<AuthResult>;changeFirstPassword:(newPassword:string)=>Promise<AuthResult>;logoutAdmin:()=>void;updateCompanyInfo:(u:Partial<CompanyInfo>)=>Promise<void>;updateAdminSettings:(u:Partial<AdminSettings>)=>Promise<void>;addProduct:(p:Omit<BilarProduct,'id'>,operation?:Pick<ProductOperation,'adminUrl'>)=>Promise<void>;updateProduct:(id:string,p:Partial<BilarProduct>,operation?:Pick<ProductOperation,'adminUrl'>)=>Promise<void>;deleteProduct:(id:string)=>Promise<void>;addRevenueStream:(p:Omit<RevenueStream,'id'>)=>Promise<void>;updateRevenueStream:(id:string,p:Partial<RevenueStream>)=>Promise<void>;deleteRevenueStream:(id:string)=>Promise<void>;addBlogPost:(p:Omit<BlogPost,'id'>)=>Promise<void>;updateBlogPost:(id:string,p:Partial<BlogPost>)=>Promise<void>;deleteBlogPost:(id:string)=>Promise<void>;addTeamMember:(p:Omit<TeamMember,'id'>)=>Promise<void>;updateTeamMember:(id:string,p:Partial<TeamMember>)=>Promise<void>;deleteTeamMember:(id:string)=>Promise<void>;addService:(p:Omit<Service,'id'>)=>Promise<void>;updateService:(id:string,p:Partial<Service>)=>Promise<void>;deleteService:(id:string)=>Promise<void>;addProject:(p:Omit<Project,'id'>)=>Promise<void>;updateProject:(id:string,p:Partial<Project>)=>Promise<void>;deleteProject:(id:string)=>Promise<void>;addSpecialist:(p:Omit<Specialist,'id'>)=>Promise<void>;updateSpecialist:(id:string,p:Partial<Specialist>)=>Promise<void>;deleteSpecialist:(id:string)=>Promise<void>;addContactMessage:(p:Omit<ContactMessage,'id'|'createdAt'|'status'>)=>Promise<void>;updateContactStatus:(id:string,status:ContactMessage['status'])=>Promise<void>;deleteContactMessage:(id:string)=>Promise<void>;addMedia:(p:Omit<MediaAsset,'id'|'createdAt'>)=>Promise<void>;deleteMedia:(id:string)=>Promise<void>;updateAdminUser:(id:string,p:Partial<AdminUser>)=>Promise<void>;deleteAdminUser:(id:string)=>Promise<void>;createAdminAccess:(name:string,email:string,role:AdminRole)=>Promise<{email:string;role:AdminRole;inviteUrl:string;tempPassword:string}>;resendAdminCredentials:(uid:string)=>Promise<{email:string;role:AdminRole;inviteUrl:string;tempPassword:string}>;addLabProject:(p:Omit<LabProject,'id'|'createdAt'|'updatedAt'>)=>Promise<void>;updateLabProject:(id:string,p:Partial<LabProject>)=>Promise<void>;deleteLabProject:(id:string)=>Promise<void>;addCareerOpening:(p:Omit<CareerOpening,'id'>)=>Promise<void>;updateCareerOpening:(id:string,p:Partial<CareerOpening>)=>Promise<void>;deleteCareerOpening:(id:string)=>Promise<void>;addPartner:(p:Omit<Partner,'id'>)=>Promise<void>;updatePartner:(id:string,p:Partial<Partner>)=>Promise<void>;deletePartner:(id:string)=>Promise<void>;exportBackupJson:()=>void;importBackupJson:(s:string)=>Promise<boolean>;resetAllToDefaults:()=>Promise<void>;}
+interface SiteContextType {
+ marketingPosts:MarketingPost[];
+ updateSocialLinks:(links:Partial<Pick<CompanyInfo,'facebook'|'instagram'|'linkedin'|'youtube'|'tiktok'|'x'>>) => Promise<void>;
+ addMarketingPost:(post:Omit<MarketingPost,'id'|'createdAt'|'updatedAt'|'createdBy'|'status'>)=>Promise<void>;
+ updateMarketingPost:(id:string,post:Pick<MarketingPost,'title'|'copy'|'mediaUrl'|'channels'>)=>Promise<void>;
+ deleteMarketingPost:(id:string)=>Promise<void>;
+}
 const Ctx=createContext<SiteContextType|undefined>(undefined);
 const normalizeAssetTree=(input:any):any=>{
   if (!input || typeof input !== 'object') return input;
@@ -162,6 +169,7 @@ export const SiteProvider:React.FC<{children:React.ReactNode}>=({children})=>{
    return normalize(null);
  });
  const [productOperations,setProductOperations]=useState<ProductOperation[]>([]);
+ const [marketingPosts,setMarketingPosts]=useState<MarketingPost[]>([]);
  const [adminUsers,setAdminUsers]=useState<AdminUser[]>([]);
  const [labProjects,setLabProjects]=useState<LabProject[]>([]);
  const [isAdminAuthenticated,setAuth]=useState(false);
@@ -187,10 +195,11 @@ export const SiteProvider:React.FC<{children:React.ReactNode}>=({children})=>{
       const role=(adminSnap.data().role||'Editor') as AdminRole;
       setCurrentAdminRole(role);
        setMustChangePassword(adminSnap.data().mustChangePassword===true);
-       const siteRef=doc(firebaseDb,'site','main');
+      const siteRef=doc(firebaseDb,'site','main');
+      const canNormalizeSite=['Super Admin','Admin','Editor'].includes(role);
        const siteSnap=await getDoc(siteRef);
-       if(!siteSnap.exists()) await setDoc(siteRef,clone(defaults));
-       else {
+      if(!siteSnap.exists()&&canNormalizeSite) await setDoc(siteRef,clone(defaults));
+      else if(siteSnap.exists()&&canNormalizeSite) {
          const rawSite:any=siteSnap.data();
          const normalized=normalize(rawSite);
          const legacyCompany=rawSite.companyInfo||{};
@@ -236,6 +245,13 @@ export const SiteProvider:React.FC<{children:React.ReactNode}>=({children})=>{
    },()=>setProductOperations([]));
  },[isAdminAuthenticated]);
 
+ useEffect(()=>{
+   if(!firebaseConfigured||!firebaseDb||!isAdminAuthenticated||!['Super Admin','Admin','Marketing'].includes(currentAdminRole||'')){setMarketingPosts([]);return;}
+   return onSnapshot(collection(firebaseDb,'marketingPosts'),snap=>{
+     setMarketingPosts(snap.docs.map(item=>({id:item.id,...item.data()} as MarketingPost)).sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt))));
+   },()=>setMarketingPosts([]));
+ },[isAdminAuthenticated,currentAdminRole]);
+
  const writeState=async(next:SiteData)=>{
    if(!firebaseConfigured||!firebaseDb||!isAdminAuthenticated)throw new Error('Acesso administrativo não autenticado.');
    const persisted=clone(next); delete persisted.contactMessages;
@@ -248,6 +264,28 @@ export const SiteProvider:React.FC<{children:React.ReactNode}>=({children})=>{
    setData(current=>({...current,[key]:value}));
  };
  const requireAdmin=()=>{if(!firebaseConfigured||!firebaseDb||!isAdminAuthenticated)throw new Error('Acesso administrativo não autenticado.');};
+ const requireMarketingAccess=()=>{requireAdmin();if(!['Super Admin','Admin','Marketing'].includes(currentAdminRole||''))throw new Error('Sem permissão para gerir Marketing.');};
+ const updateSocialLinks=async(links:Partial<Pick<CompanyInfo,'facebook'|'instagram'|'linkedin'|'youtube'|'tiktok'|'x'>>)=>{
+   requireMarketingAccess();
+   const allowed=['facebook','instagram','linkedin','youtube','tiktok','x'];
+   const entries=Object.entries(links).filter(([key,value])=>allowed.includes(key)&&typeof value==='string');
+   if(!entries.length)return;
+   const updates=Object.fromEntries(entries.map(([key,value])=>[`companyInfo.${key}`,value]));
+   const companyChanges=Object.fromEntries(entries);
+   await updateDoc(doc(firebaseDb!,'site','main'),updates);
+   setData(current=>({...current,companyInfo:{...current.companyInfo,...companyChanges}}));
+ };
+ const addMarketingPost=async(post:Omit<MarketingPost,'id'|'createdAt'|'updatedAt'|'createdBy'|'status'>)=>{
+   requireMarketingAccess();
+   const now=new Date().toISOString();
+   const ref=doc(collection(firebaseDb!,'marketingPosts'));
+   await setDoc(ref,{...post,id:ref.id,status:'draft',createdAt:now,updatedAt:now,createdBy:user?.email||user?.uid||'Utilizador'});
+ };
+ const updateMarketingPost=async(id:string,post:Pick<MarketingPost,'title'|'copy'|'mediaUrl'|'channels'>)=>{
+   requireMarketingAccess();
+   await updateDoc(doc(firebaseDb!,'marketingPosts',id),{...post,updatedAt:new Date().toISOString()});
+ };
+ const deleteMarketingPost=async(id:string)=>{requireMarketingAccess();await deleteDoc(doc(firebaseDb!,'marketingPosts',id));};
  const update=(key:string,id:string,p:any)=>persistKey(key as keyof SiteData,(data as any)[key].map((x:any)=>x.id===id?{...x,...p}:x));
  const add=(key:string,p:any)=>persistKey(key as keyof SiteData,[...(data as any)[key],{...p,id:`${key}-${Date.now()}`}]);
  const remove=(key:string,id:string)=>persistKey(key as keyof SiteData,(data as any)[key].filter((x:any)=>x.id!==id));
@@ -454,7 +492,7 @@ export const SiteProvider:React.FC<{children:React.ReactNode}>=({children})=>{
  const publicCompanyInfo={...data.companyInfo,stats:[{value:String(data.projects.filter(x=>x.status!=='archived').length),label:'Projectos publicados',icon:'FolderGit2'},{value:String(data.bilarProducts.filter(x=>x.active!==false).length),label:'Produtos Bilar',icon:'Package'},{value:String(data.teamMembers.filter(x=>x.active!==false).length),label:'Pessoas na equipa',icon:'Users'},{value:String(data.services.filter(x=>x.active!==false).length),label:'Serviços activos',icon:'BriefcaseBusiness'}]};
  const safe=(fn:any)=>(...args:any[])=>fn(...args).catch((e:any)=>{console.error(e);});
  const value=useMemo<SiteContextType>(()=>({
-   currentAdminRole,mustChangePassword,
+  currentAdminRole,mustChangePassword,marketingPosts,updateSocialLinks,addMarketingPost,updateMarketingPost,deleteMarketingPost,
    ...data,companyInfo:publicCompanyInfo,labProjects,productOperations,adminUsers,isAdminAuthenticated,firebaseReady:firebaseConfigured,authReady,
    loginAdmin,loginAdminWithGoogle,resetAdminPassword,logoutAdmin,
    updateCompanyInfo:safe(async(u:any)=>persistKey('companyInfo',{...data.companyInfo,...u})),
@@ -469,7 +507,7 @@ export const SiteProvider:React.FC<{children:React.ReactNode}>=({children})=>{
    addContactMessage,updateContactStatus,deleteContactMessage,
    addMedia:safe((p:any)=>add('mediaAssets',{...p,createdAt:new Date().toISOString()})),changeFirstPassword,deleteMedia:safe((id:any)=>remove('mediaAssets',id)),updateAdminUser,deleteAdminUser,createAdminAccess,resendAdminCredentials,addLabProject,updateLabProject,deleteLabProject,addCareerOpening:safe((p:any)=>addCareerOpening(p)),updateCareerOpening:safe((id:any,p:any)=>updateCareerOpening(id,p)),deleteCareerOpening:safe((id:any)=>deleteCareerOpening(id)),addPartner:safe((p:any)=>addPartner(p)),updatePartner:safe((id:any,p:any)=>updatePartner(id,p)),deletePartner:safe((id:any)=>deletePartner(id)),
    exportBackupJson,importBackupJson,resetAllToDefaults
- }),[data,publicCompanyInfo,labProjects,productOperations,adminUsers,isAdminAuthenticated,authReady,currentAdminRole,mustChangePassword]);
+ }),[data,publicCompanyInfo,labProjects,productOperations,adminUsers,marketingPosts,isAdminAuthenticated,authReady,currentAdminRole,mustChangePassword]);
  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 };
 export const useSiteData=()=>{const c=useContext(Ctx);if(!c)throw new Error('useSiteData must be used within SiteProvider');return c};
